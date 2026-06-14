@@ -1,0 +1,33 @@
+#wdr-component {
+    max-width: 560px;
+}
+.wdr-header {
+    background-color: rgb(255, 255, 255) !important;
+}
+.wdr-cell {
+    background-color: rgb(202, 242, 255) !important;
+    height: 40px !important;
+        padding: 0 !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+}
+.cell-water {
+    background-color: rgb(202, 242, 255) !important;
+}
+.cell-ship {
+    background-color: rgb(213, 172, 255) !important;
+}
+.cell-block {
+    background-color: rgb(128, 128, 128) !important;
+}
+.inner__button > button{
+    margin: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+.inner__button > button.active {
+    background-color: #4caf50;
+    color: white;
+    border: 2px solid #2e7d32;
+}

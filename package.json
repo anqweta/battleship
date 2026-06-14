@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@webdatarocks/webdatarocks": "^1.4.23"
+  }
+}
