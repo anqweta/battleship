@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Морський бій 12х12</title>
+
+    <link
+      href="https://cdn.webdatarocks.com/latest/webdatarocks.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="wrapper">
+      <h3 id="turn-status">Підготовка до гри...</h3>
+      <div class="zone-player">
+        <div id="wdr-component-player"></div>
+        <div class="inner__button">
+          <button data-size="1" id="set-ship-1">
+            Однопалубних залишилось: <span id="count-1">4</span>
+          </button>
+          <button data-size="2" id="set-ship-2">
+            Двопалубних залишилось: <span id="count-2">3</span>
+          </button>
+          <button data-size="3" id="set-ship-3">
+            Трипалубних залишилось: <span id="count-3">2</span>
+          </button>
+          <button data-size="4" id="set-ship-4">
+            Чотирипалубних залишилось: <span id="count-4">1</span>
+          </button>
+          <button id="button-ready">Готово в бій!</button>
+        </div>
+      </div>
+      <div id="wdr-component-enemy"></div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.webdatarocks.com/latest/webdatarocks.js"></script>
+    <script type="module" src="js/script.js"></script>
+  </body>
+</html>

@@ -1,5 +1,26 @@
 {
   "dependencies": {
-    "@webdatarocks/webdatarocks": "^1.4.23"
-  }
+    "@webdatarocks/webdatarocks": "^1.4.23",
+    "express": "^5.2.1",
+    "socket.io": "^4.8.3"
+  },
+  "name": "bonus",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anqweta/battleship.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/anqweta/battleship/issues"
+  },
+  "homepage": "https://github.com/anqweta/battleship#readme"
 }
