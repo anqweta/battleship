@@ -19,22 +19,21 @@ io.on("connection", (socket) => {
     readyPlayers = 0;
   });
 
-  // ПОЧАТОК БЛОКУ: Коли хтось натиснув кнопку "Я готовий"
+
   socket.on("ships_ready", (board) => {
-    readyPlayers++; // 1. Додаємо +1 до лічильника готових гравців
+    readyPlayers++; 
 
-    socket.broadcast.emit("enemy_board_ready", board); // 2. Відправляємо кораблі другу
+    socket.broadcast.emit("enemy_board_ready", board); 
 
-    // 3. УСЯ логіка ходів має бути ТУТ, всередині події ships_ready!
     if (readyPlayers === 1) {
       socket.emit("set_turn", false);
     } else if (readyPlayers === 2) {
       socket.emit("set_turn", true);
       socket.broadcast.emit("set_turn", false);
-      readyPlayers = 0; // Обнуляємо для наступної гри
+      readyPlayers = 0; 
     }
   });
-  // КІНЕЦЬ БЛОКУ
+
 });
 
 http.listen(3000, () => {

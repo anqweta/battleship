@@ -24,33 +24,6 @@ window.addEventListener("contextmenu", function (e) {
   isHorizontal = !isHorizontal;
 });
 
-socket.on("enemy_board_ready", (enemyBoard) => {
-  secretEnemyBoard = enemyBoard;
-  alert("Ворог розставив кораблі");
-});
-
-socket.on("enemy_shoot", (data) => {
-  // data містить { row, col, status }
-
-  // Шукаємо клітинку, в яку вистрілив ворог, на НАШІЙ дошці
-  let myCell = gridData.find(
-    (item) => item.Row === data.row && item.Column === data.col,
-  );
-
-  if (myCell) {
-    // Оновлюємо статус нашої клітинки (ставимо 3 - підбито, або 4 - промах)
-    myCell.Status = data.status;
-
-    // Оновлюємо нашу таблицю, щоб ми побачили дірку в своєму кораблі або сплеск води
-    pivot.updateData({
-      data: gridData,
-    });
-
-    isMyTurn = true;
-    updateTurnUI();
-  }
-});
-
 for (let row = 1; row <= 10; row++) {
   for (let col = 0; col < columns.length; col++) {
     gridData.push({
@@ -342,6 +315,7 @@ buttonReady.addEventListener("click", () => {
   }
   socket.emit("ships_ready", gridData);
   buttonReady.disabled = true;
+  document.querySelector(".inner__button").style.display = "none";
   alert("Кораблі відправлено! Чекаємо на ворога...");
 });
 
@@ -389,6 +363,20 @@ function setShip(startRow, startColIndex, size, isHorizontal) {
   });
 
   shipRemaining[size]--;
+
+  let countSpan = document.getElementById("count-" + size);
+  if (countSpan) {
+    countSpan.innerText = shipRemaining[size];
+  }
+
+  if (shipRemaining[size] === 0) {
+    let shipButton = document.getElementById("set-ship-" + size);
+    if (shipButton) {
+      shipButton.disabled = true;
+      shipButton.classList.remove("active");
+      currentSelectedShipButton = 0;
+    }
+  }
 }
 
 function getCell(row, colName) {
@@ -399,14 +387,36 @@ function getCell(row, colName) {
   return gridData.find((item) => item.Row === row && item.Column === colName);
 }
 
+socket.on("enemy_board_ready", (enemyBoard) => {
+  secretEnemyBoard = enemyBoard;
+  alert("Ворог розставив кораблі");
+});
+
+socket.on("enemy_shoot", (data) => {
+  let myCell = gridData.find(
+    (item) => item.Row === data.row && item.Column === data.col,
+  );
+
+  if (myCell) {
+    myCell.Status = data.status;
+
+    pivot.updateData({
+      data: gridData,
+    });
+
+    isMyTurn = true;
+    updateTurnUI();
+  }
+});
+
 function updateTurnUI() {
   const turnStatus = document.getElementById("turn-status");
   if (isMyTurn) {
     turnStatus.innerText = "Твій хід";
-    turnStatus.style.color = "green";
+    turnStatus.style.color = "#93e896";
   } else {
     turnStatus.innerText = "Хід супротивника";
-    turnStatus.style.color = "red";
+    turnStatus.style.color = "#f8a9cf";
   }
 }
 

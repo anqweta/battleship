@@ -12,9 +12,8 @@
   </head>
   <body>
     <div class="wrapper">
-      <h3 id="turn-status">Підготовка до гри...</h3>
-      <div class="zone-player">
-        <div id="wdr-component-player"></div>
+      <h1 id="turn-status">Підготовка до гри...</h1>
+      <main>
         <div class="inner__button">
           <button data-size="1" id="set-ship-1">
             Однопалубних залишилось: <span id="count-1">4</span>
@@ -30,8 +29,9 @@
           </button>
           <button id="button-ready">Готово в бій!</button>
         </div>
-      </div>
-      <div id="wdr-component-enemy"></div>
+        <div id="wdr-component-player"></div>
+        <div id="wdr-component-enemy"></div>
+      </main>
     </div>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdn.webdatarocks.com/latest/webdatarocks.js"></script>
