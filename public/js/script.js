@@ -335,8 +335,14 @@ enemy.on("cellclick", function (cellData) {
 let buttonReady = document.getElementById("button-ready");
 
 buttonReady.addEventListener("click", () => {
+  let allShipsPlaced = Object.values(shipRemaining).every((val) => val === 0);
+  if (!allShipsPlaced) {
+    alert("Розставьте усі кораблі!");
+    return;
+  }
   socket.emit("ships_ready", gridData);
   buttonReady.disabled = true;
+  alert("Кораблі відправлено! Чекаємо на ворога...");
 });
 
 function setShip(startRow, startColIndex, size, isHorizontal) {
@@ -351,7 +357,7 @@ function setShip(startRow, startColIndex, size, isHorizontal) {
       ? getCell(startRow, columns[startColIndex + i])
       : getCell(startRow + i, columns[startColIndex]);
 
-    if (!cell) {
+    if (!cell || cell.Status !== 0) {
       return false;
     }
 
