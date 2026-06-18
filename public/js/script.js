@@ -12,6 +12,8 @@ let shipRemaining = {
   3: 2,
   4: 1,
 };
+let myShips = [];
+let secretEnemyShips = [];
 
 let isHorizontal = true;
 let isMyTurn = false;
@@ -257,7 +259,6 @@ pivot.on("cellclick", function (cellData) {
 });
 
 enemy.on("cellclick", function (cellData) {
-  // 1. Виправили на три дорівнює (===)
   if (cellData.type === "value") {
     if (secretEnemyBoard.length === 0) {
       alert("Почекай, ворог ще не розставив кораблі!");
@@ -269,7 +270,6 @@ enemy.on("cellclick", function (cellData) {
       return;
     }
 
-    // 2. Додали parseInt(), щоб перетворити рядок "1" у число 1
     let clickedRow = parseInt(cellData.rows[0].caption);
     let clickedColumn = cellData.columns[0].caption;
 
@@ -277,17 +277,55 @@ enemy.on("cellclick", function (cellData) {
       (item) => item.Row === clickedRow && item.Column === clickedColumn,
     );
 
-    // Додаємо перевірку, чи взагалі знайшлась клітинка, і чи туди ще не стріляли
     if (visibleEnemyCell && visibleEnemyCell.Status === 0) {
       let secretCell = secretEnemyBoard.find(
         (item) => item.Row === clickedRow && item.Column === clickedColumn,
       );
 
-      // 3. УСЯ логіка пострілу тепер ВСЕРЕДИНІ цих фігурних дужок
+      let isHit = false;
+      let isKilled = false;
+      let killedShipCells = [];
+
       if (secretCell && secretCell.Status === 1) {
-        visibleEnemyCell.Status = 3; // Влучив
+        visibleEnemyCell.Status = 3; q
+        isHit = true;
+
+        let targetShip = secretEnemyShips.find((ship) =>
+          ship.cells.some(
+            (c) => c.row === clickedRow && c.col === clickedColumn,
+          ),
+        );
+
+        if (targetShip) {
+          targetShip.hits++;
+
+          if (targetShip.hits === targetShip.size) {
+            isKilled = true;
+            killedShipCells = targetShip.cells;
+            alert("Корабель вбито!");
+
+            killedShipCells.forEach((killedCell) => {
+              let r = killedCell.row;
+              let c = columns.indexOf(killedCell.col);
+
+              for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                  let nCol = columns[c + dc];
+                  if (r + dr >= 1 && r + dr <= 10 && nCol) {
+                    let neighbor = gridDataEnemy.find(
+                      (item) => item.Row === r + dr && item.Column === nCol,
+                    );
+                    if (neighbor && neighbor.Status === 0) {
+                      neighbor.Status = 4;
+                    }
+                  }
+                }
+              }
+            });
+          }
+        }
       } else {
-        visibleEnemyCell.Status = 4; // Промазав
+        visibleEnemyCell.Status = 4; 
       }
 
       enemy.updateData({
@@ -298,9 +336,13 @@ enemy.on("cellclick", function (cellData) {
         row: clickedRow,
         col: clickedColumn,
         status: visibleEnemyCell.Status,
+        killedCells: isKilled ? killedShipCells : null, // Передаємо координати вбитого корабля другу
       });
-      isMyTurn = false;
-      updateTurnUI();
+
+      if (!isHit) {
+        isMyTurn = false;
+        updateTurnUI();
+      }
     }
   }
 });
@@ -313,7 +355,7 @@ buttonReady.addEventListener("click", () => {
     alert("Розставьте усі кораблі!");
     return;
   }
-  socket.emit("ships_ready", gridData);
+  socket.emit("ships_ready", { board: gridData, ships: myShips });
   buttonReady.disabled = true;
   document.querySelector(".inner__button").style.display = "none";
   alert("Кораблі відправлено! Чекаємо на ворога...");
@@ -340,6 +382,16 @@ function setShip(startRow, startColIndex, size, isHorizontal) {
 
   shipCells.forEach((cell) => {
     cell.Status = 1;
+  });
+
+  let currentShipCoords = shipCells.map((cell) => ({
+    row: cell.Row,
+    col: cell.Column,
+  }));
+  myShips.push({
+    cells: currentShipCoords,
+    hits: 0,
+    size: size,
   });
 
   shipCells.forEach((cell) => {
@@ -388,7 +440,8 @@ function getCell(row, colName) {
 }
 
 socket.on("enemy_board_ready", (enemyBoard) => {
-  secretEnemyBoard = enemyBoard;
+  secretEnemyBoard = data.board; 
+  secretEnemyShips = data.ships;
   alert("Ворог розставив кораблі");
 });
 
@@ -400,12 +453,35 @@ socket.on("enemy_shoot", (data) => {
   if (myCell) {
     myCell.Status = data.status;
 
+    if (data.killedCells) {
+      data.killedCells.forEach((killedCell) => {
+        let r = killedCell.row;
+        let c = columns.indexOf(killedCell.col);
+
+        for (let dr = -1; dr <= 1; dr++) {
+          for (let dc = -1; dc <= 1; dc++) {
+            let nCol = columns[c + dc];
+            if (r + dr >= 1 && r + dr <= 10 && nCol) {
+              let neighbor = gridData.find(
+                (item) => item.Row === r + dr && item.Column === nCol,
+              );
+              if (neighbor && neighbor.Status === 0) {
+                neighbor.Status = 4; 
+              }
+            }
+          }
+        }
+      });
+    }
+
     pivot.updateData({
       data: gridData,
     });
 
-    isMyTurn = true;
-    updateTurnUI();
+    if (data.status === 4) {
+      isMyTurn = true;
+      updateTurnUI();
+    }
   }
 });
 
