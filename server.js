@@ -34,6 +34,11 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("game_over", () => {
+    socket.broadcast.emit("you_lose");
+    readyPlayers = 0; // Обнуляємо лічильник, щоб можна було почати нову гру
+  });
+
 });
 
 http.listen(3000, () => {

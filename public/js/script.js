@@ -13,6 +13,7 @@ let shipRemaining = {
   4: 1,
 };
 let myShips = [];
+let enemyShipsKilled = 0;
 let secretEnemyShips = [];
 
 let isHorizontal = true;
@@ -21,11 +22,13 @@ let isMyTurn = false;
 const container_button = document.querySelectorAll(".inner__button");
 const buttons = document.querySelectorAll(".inner__button > button");
 
+//ВЕРТИКАЛЬНІ КОРАБЛІ НА ПКМ
 window.addEventListener("contextmenu", function (e) {
   e.preventDefault();
   isHorizontal = !isHorizontal;
 });
 
+//ФОРМУВАННЯ ТАБЛИЦІ
 for (let row = 1; row <= 10; row++) {
   for (let col = 0; col < columns.length; col++) {
     gridData.push({
@@ -43,36 +46,31 @@ for (let row = 1; row <= 10; row++) {
 
 var enemy = new WebDataRocks({
   container: "#wdr-component-enemy",
-  toolbar: false, // Отключаем верхнюю панель инструментов библиотеки
+  toolbar: false,
   report: {
     dataSource: {
-      data: gridDataEnemy, // Передаем наш сгенерированный массив
+      data: gridDataEnemy,
     },
     slice: {
-      rows: [
-        { uniqueName: "Row" }, // Строки 1-10
-      ],
-      columns: [
-        { uniqueName: "Column" }, // Столбцы А-К
-      ],
+      rows: [{ uniqueName: "Row" }],
+      columns: [{ uniqueName: "Column" }],
       measures: [
         {
           uniqueName: "Status",
 
-          aggregation: "none", // Не пытаемся складывать слова
+          aggregation: "none",
         },
       ],
     },
 
     options: {
       grid: {
-        showGrandTotals: "off", // Выключаем общие итоги (11-я строка/столбец)
-
+        showGrandTotals: "off",
         showTotals: "off",
 
-        showFilter: false, // Убираем иконки фильтрации в заголовках
+        showFilter: false,
 
-        showHeaders: false, // Убираем лишние системные заголовки библиотеки
+        showHeaders: false,
       },
     },
 
@@ -120,10 +118,10 @@ var enemy = new WebDataRocks({
       cell.addClass("cell-block");
     }
     if (data.value == 3) {
-      cell.addClass("cell-hit"); // Клас для підбитого корабля
+      cell.addClass("cell-hit");
     }
     if (data.value == 4) {
-      cell.addClass("cell-miss"); // Клас для промаху
+      cell.addClass("cell-miss");
     }
   },
 });
@@ -131,40 +129,35 @@ var enemy = new WebDataRocks({
 var pivot = new WebDataRocks({
   container: "#wdr-component-player",
 
-  toolbar: false, // Отключаем верхнюю панель инструментов библиотеки
+  toolbar: false,
 
   report: {
     dataSource: {
-      data: gridData, // Передаем наш сгенерированный массив
+      data: gridData,
     },
 
     slice: {
-      rows: [
-        { uniqueName: "Row" }, // Строки 1-10
-      ],
+      rows: [{ uniqueName: "Row" }],
 
-      columns: [
-        { uniqueName: "Column" }, // Столбцы А-К
-      ],
+      columns: [{ uniqueName: "Column" }],
 
       measures: [
         {
           uniqueName: "Status",
 
-          aggregation: "none", // Не пытаемся складывать слова
+          aggregation: "none",
         },
       ],
     },
 
     options: {
       grid: {
-        showGrandTotals: "off", // Выключаем общие итоги (11-я строка/столбец)
+        showGrandTotals: "off",
 
         showTotals: "off",
 
-        showFilter: false, // Убираем иконки фильтрации в заголовках
-
-        showHeaders: false, // Убираем лишние системные заголовки библиотеки
+        showFilter: false,
+        showHeaders: false,
       },
     },
 
@@ -213,14 +206,15 @@ var pivot = new WebDataRocks({
     }
 
     if (data.value == 3) {
-      cell.addClass("cell-hit"); // Клас для підбитого корабля
+      cell.addClass("cell-hit");
     }
     if (data.value == 4) {
-      cell.addClass("cell-miss"); // Клас для промаху
+      cell.addClass("cell-miss");
     }
   },
 });
 
+//КНОПКИ
 buttons.forEach((button, index) => {
   button.addEventListener("click", () => {
     currentSelectedShipButton = parseInt(button.getAttribute("data-size"));
@@ -231,6 +225,7 @@ buttons.forEach((button, index) => {
   });
 });
 
+//НАШЕ ПОЛЕ
 pivot.on("cellclick", function (cellData) {
   if (cellData.type === "value") {
     if (cellData.type === "value") {
@@ -258,6 +253,7 @@ pivot.on("cellclick", function (cellData) {
   });
 });
 
+//ПОЛЕ СУПРОТИВНИКА
 enemy.on("cellclick", function (cellData) {
   if (cellData.type === "value") {
     if (secretEnemyBoard.length === 0) {
@@ -287,7 +283,7 @@ enemy.on("cellclick", function (cellData) {
       let killedShipCells = [];
 
       if (secretCell && secretCell.Status === 1) {
-        visibleEnemyCell.Status = 3; q
+        visibleEnemyCell.Status = 3;
         isHit = true;
 
         let targetShip = secretEnemyShips.find((ship) =>
@@ -302,7 +298,12 @@ enemy.on("cellclick", function (cellData) {
           if (targetShip.hits === targetShip.size) {
             isKilled = true;
             killedShipCells = targetShip.cells;
-            alert("Корабель вбито!");
+            enemyShipsKilled++;
+            if (enemyShipsKilled === 10) {
+              alert("Ви перемогли!");
+            } else {
+              alert("Корабель вбито!");
+            }
 
             killedShipCells.forEach((killedCell) => {
               let r = killedCell.row;
@@ -325,7 +326,7 @@ enemy.on("cellclick", function (cellData) {
           }
         }
       } else {
-        visibleEnemyCell.Status = 4; 
+        visibleEnemyCell.Status = 4;
       }
 
       enemy.updateData({
@@ -336,10 +337,17 @@ enemy.on("cellclick", function (cellData) {
         row: clickedRow,
         col: clickedColumn,
         status: visibleEnemyCell.Status,
-        killedCells: isKilled ? killedShipCells : null, // Передаємо координати вбитого корабля другу
+        killedCells: isKilled ? killedShipCells : null,
       });
 
-      if (!isHit) {
+      if (enemyShipsKilled === 10) {
+        socket.emit("game_over");
+        isMyTurn = false;
+
+        let turnStatus = document.getElementById("turn-status");
+        turnStatus.innerText = "Ви перемогли!";
+        turnStatus.style.color = "gold";
+      } else if (!isHit) {
         isMyTurn = false;
         updateTurnUI();
       }
@@ -347,6 +355,7 @@ enemy.on("cellclick", function (cellData) {
   }
 });
 
+//КНОПКА ДЛЯ ПОЧАТКУ ГРИ
 let buttonReady = document.getElementById("button-ready");
 
 buttonReady.addEventListener("click", () => {
@@ -361,6 +370,7 @@ buttonReady.addEventListener("click", () => {
   alert("Кораблі відправлено! Чекаємо на ворога...");
 });
 
+//ПОСТАНОВКА КОРАБЛЯ
 function setShip(startRow, startColIndex, size, isHorizontal) {
   if (shipRemaining[size] <= 0) {
     return false;
@@ -439,12 +449,14 @@ function getCell(row, colName) {
   return gridData.find((item) => item.Row === row && item.Column === colName);
 }
 
-socket.on("enemy_board_ready", (enemyBoard) => {
-  secretEnemyBoard = data.board; 
+//ЧИ ГОТОВ ВОРОГ
+socket.on("enemy_board_ready", (data) => {
+  secretEnemyBoard = data.board;
   secretEnemyShips = data.ships;
   alert("Ворог розставив кораблі");
 });
 
+//ХІД
 socket.on("enemy_shoot", (data) => {
   let myCell = gridData.find(
     (item) => item.Row === data.row && item.Column === data.col,
@@ -466,7 +478,7 @@ socket.on("enemy_shoot", (data) => {
                 (item) => item.Row === r + dr && item.Column === nCol,
               );
               if (neighbor && neighbor.Status === 0) {
-                neighbor.Status = 4; 
+                neighbor.Status = 4;
               }
             }
           }
@@ -485,6 +497,7 @@ socket.on("enemy_shoot", (data) => {
   }
 });
 
+//ОНОВЛЕННЯ ЗАГЛОВКУ
 function updateTurnUI() {
   const turnStatus = document.getElementById("turn-status");
   if (isMyTurn) {
@@ -501,188 +514,11 @@ socket.on("set_turn", (turnValue) => {
   updateTurnUI();
 });
 
-/*
+socket.on("you_lose", () => {
+  alert("Ворог знищив всі кораблі!");
+  isMyTurn = false;
 
-
-function setSingleDeskShip(cellData) {
-
-if (currentSelectedShipButton == 1  && oneCellShipPlaced > 0) {
-
-    if (cellData.type === "value") {
-
-    let clickedRow = cellData.rows[0].caption;
-
-    let clickedColumn = cellData.columns[0].caption;
-
-    let r = parseInt(clickedRow);
-
-    let c = columns.indexOf(clickedColumn);
-
-    let clickedCell = gridData.find(item => item.Row === parseInt(clickedRow) && item.Column === clickedColumn);
-
-    let blockedCells = [
-
-        [r, columns[c + 1]],  
-
-        [r, columns[c - 1]],
-
-        [r + 1, columns[c]],  
-
-        [r - 1, columns[c]],
-
-        [r + 1, columns[c + 1]],
-
-        [r - 1, columns[c - 1]],
-
-        [r + 1, columns[c - 1]],
-
-        [r - 1, columns[c + 1]]  
-
-];
-
-    if (clickedCell) {
-
-        if (clickedCell.Status === 0) {
-
-            clickedCell.Status = 1;
-
-            oneCellShipPlaced--;    
-
-            pivot.updateData({
-
-            data: gridData
-
-            });
-
-
-            blockedCells.forEach(coords => {
-
-let nRow = coords[0];
-
-let nCol = coords[1];
-
-
-if (nRow >= 1 && nRow <= 10 && nCol !== undefined) {
-
-    let neighbor = gridData.find(item => item.Row === nRow && item.Column === nCol);
-
-    if (neighbor && neighbor.Status === 0) {
-
-        neighbor.Status = 2;
-
-    }
-
-}
-
+  let turnStatus = document.getElementById("turn-status");
+  turnStatus.innerText = "Гру завершено! Ви програли!";
+  turnStatus.style.color = "gray";
 });
-
-        }
-
-    }
-
-}
-
-}
-
-}
-
-
-function setDoubleDeskShip(cellData) {
-
-if (currentSelectedShipButton == 2 && twoCellShipPlaced > 0) {
-
-    if (cellData.type === "value") {
-
-        let clickedRow = cellData.rows[0].caption;
-
-        let clickedColumn = cellData.columns[0].caption;
-
-        let r = parseInt(clickedRow);
-
-        let c = columns.indexOf(clickedColumn);
-
-        let clickedCell = gridData.find(item => item.Row === parseInt(clickedRow) && item.Column === clickedColumn);
-
-        if (isHorizontal) {
-
-            let secondCell = gridData.find(item => item.Row === parseInt(clickedRow) && item.Column === columns[c + 1]);
-
-            let blockedCells = [
-
-                [r, columns[c - 1]],
-
-                [r + 1, columns[c]],
-
-                [r - 1, columns[c]],
-
-                [r + 1, columns[c + 1]],
-
-                [r - 1, columns[c - 1]],
-
-                [r + 1, columns[c - 1]],
-
-                [r - 1, columns[c + 1]],
-
-                [r, columns[c + 2]],
-
-                [r - 1, columns[c - 1]],
-
-                [r - 1, columns[c + 2]],
-
-                [r + 1, columns[c + 2]]
-
-            ];
-
-            if (clickedCell) {
-
-                if (clickedCell.Status === 0) {
-
-                    clickedCell.Status = 1;
-
-                    secondCell.Status = 1;
-
-                    twoCellShipPlaced--;
-
-                    pivot.updateData({
-
-                        data: gridData
-
-                    });
-
-                }
-
-            }
-
-                blockedCells.forEach(coords => {
-
-let nRow = coords[0];
-
-let nCol = coords[1];
-
-
-if (nRow >= 1 && nRow <= 10 && nCol !== undefined) {
-
-    let neighbor = gridData.find(item => item.Row === nRow && item.Column === nCol);
-
-    if (neighbor && neighbor.Status === 0) {
-
-        neighbor.Status = 2;
-
-    }
-
-}
-
-});
-
-        }
-
-        
-
-    }
-
-}
-
-}
-
-
-*/
