@@ -229,6 +229,11 @@ buttons.forEach((button, index) => {
 pivot.on("cellclick", function (cellData) {
   if (cellData.type === "value") {
     if (cellData.type === "value") {
+      if (currentSelectedShipButton === 0) {
+        alert("Спочатку оберіть розмір корабля!");
+        return;
+      }
+
       let clickedRow = cellData.rows[0].caption;
 
       let clickedColumn = cellData.columns[0].caption;
@@ -367,11 +372,13 @@ buttonReady.addEventListener("click", () => {
   socket.emit("ships_ready", { board: gridData, ships: myShips });
   buttonReady.disabled = true;
   document.querySelector(".inner__button").style.display = "none";
-  alert("Кораблі відправлено! Чекаємо на ворога...");
+  alert("Кораблі відправлено! Чекаємо на іншого гравця");
 });
 
 //ПОСТАНОВКА КОРАБЛЯ
 function setShip(startRow, startColIndex, size, isHorizontal) {
+  if (size === 0 || shipRemaining[size] === undefined) return false;
+
   if (shipRemaining[size] <= 0) {
     return false;
   }

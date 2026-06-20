@@ -15,7 +15,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("Гравець вийшов");
+    console.log("Гравець вийшов!");
     readyPlayers = 0;
   });
 
@@ -36,7 +36,7 @@ io.on("connection", (socket) => {
 
   socket.on("game_over", () => {
     socket.broadcast.emit("you_lose");
-    readyPlayers = 0; // Обнуляємо лічильник, щоб можна було почати нову гру
+    readyPlayers = 0; 
   });
 
 });
